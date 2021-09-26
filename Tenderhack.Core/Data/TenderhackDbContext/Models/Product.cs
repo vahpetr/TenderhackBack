@@ -15,9 +15,6 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Models
         public int CategoryId { get; set; }
         public Category Category { get; set; }
 
-        [Required, MaxLength(32)]
-        public string CpgzCode { get; set; }
-
         public ICollection<Characteristic> Characteristics { get; set; } = new List<Characteristic>();
         [JsonIgnore]
         public ICollection<Order> Orders { get; set; } = new List<Order>();

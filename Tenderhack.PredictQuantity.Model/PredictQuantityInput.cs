@@ -16,7 +16,7 @@ namespace Tenderhack.PredictQuantity.Model
 
 
         [ColumnName("kpgz"), LoadColumn(1)]
-        public string CpgzCode { get; set; }
+        public string Kpgz { get; set; }
 
 
         [ColumnName("season"), LoadColumn(2)]

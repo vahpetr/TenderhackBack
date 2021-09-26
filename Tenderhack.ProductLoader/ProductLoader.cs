@@ -28,10 +28,11 @@ namespace Tenderhack.ProductLoader
       await _migrator.MigrateAsync();
       var externalIds = await _dbContext.Products.Select(p => p.ExternalId).ToListAsync();
       var externalIdsSet = externalIds.ToHashSet();
-      var categories = _dbContext.Categories.ToDictionary(p => p.Title);
+      var categories = _dbContext.Categories.ToDictionary(p => p.Kpgz);
+      var characteristics = _dbContext.Characteristics.ToDictionary(p => $"{p.Name}_{p.Value}");
       // https://medium.com/@matias.paulo84/high-performance-csv-parser-with-system-io-pipelines-3678d4a5217a
       var parser = new ProductParser();
-      var products = parser.Parse(args[0], externalIdsSet, categories);
+      var products = parser.Parse(args[0], externalIdsSet, categories, characteristics);
 
       // var i = 0;
       // foreach (var p in products)

@@ -12,7 +12,7 @@ namespace Tenderhack.ProductLoader
 {
   public class ProductParser
   {
-    public IEnumerable<Product> Parse(string filePath, HashSet<int> externalIds, Dictionary<string, Category> categories)
+    public IEnumerable<Product> Parse(string filePath, HashSet<int> externalIds, Dictionary<string, Category> categories, Dictionary<string, Core.Data.TenderhackDbContext.Models.Characteristic> characteristics)
     {
       var options = new JsonSerializerOptions
       {
@@ -42,26 +42,27 @@ namespace Tenderhack.ProductLoader
           continue;
         }
 
-        var key = csv.GetField<string>(2);
-        if (string.IsNullOrWhiteSpace(key))
+        var categoryTitle = csv.GetField<string>(2);
+        if (string.IsNullOrWhiteSpace(categoryTitle))
         {
           continue;
         }
 
-        var cpgzCode = csv.GetField<string>(3);
-        if (string.IsNullOrWhiteSpace(cpgzCode) || cpgzCode.Length > 32)
+        var categoryKpgz = csv.GetField<string>(3);
+        if (string.IsNullOrWhiteSpace(categoryKpgz) || categoryKpgz.Length > 32)
         {
           // skip
           continue;
         }
 
-        if (!categories.TryGetValue(key, out var category))
+        if (!categories.TryGetValue(categoryKpgz, out var category))
         {
           category = new Category()
           {
-            Title = key
+            Title = categoryTitle,
+            Kpgz = categoryKpgz
           };
-          categories.Add(key, category);
+          categories.Add(categoryKpgz, category);
         }
 
         var json = csv.GetField<string>(4);
@@ -84,14 +85,21 @@ namespace Tenderhack.ProductLoader
           ExternalId = externalId,
           Name = name,
           Category = category,
-          CpgzCode = cpgzCode,
           Characteristics = rawCharacteristic
             .Where(p =>  p.Name.Length <= 511 && p.Value != null && p.Value.Length <= 255 && p.Id > 0)
-            .Select(p => new Characteristic()
-            {
-              ExternalId = p.Id,
-              Name = p.Name,
-              Value = p.Value,
+            .Select(p => {
+              var characteristicKey = $"{p.Name}_{p.Value}";
+              if (!characteristics.TryGetValue(characteristicKey, out var characteristic))
+              {
+                characteristic = new Characteristic()
+                {
+                  ExternalId = p.Id,
+                  Name = p.Name,
+                  Value = p.Value,
+                };
+                characteristics.Add(characteristicKey, characteristic);
+              }
+              return characteristic;
             })
             .ToList()
         };

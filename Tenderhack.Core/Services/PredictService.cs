@@ -64,6 +64,7 @@ namespace Tenderhack.Core.Services
 
       var items = _dbContext.Value.Orders.AsNoTracking()
         .Include(p => p.Product)
+          .ThenInclude(p => p.Category)
         .Where(p =>
             p.Contract.Customer.Inn == inn &&
             p.Contract.Customer.Kpp.StartsWith(kppRegion) &&
@@ -78,7 +79,7 @@ namespace Tenderhack.Core.Services
           Score = _predictionEnginePool.Predict("PredictQuantity", new PredictQuantityInput()
           {
             CustomerRegion = kppRegionNumber,
-            CpgzCode = order.Product.CpgzCode,
+            Kpgz = order.Product.Category.Kpgz,
             Season = season
           }).Score,
           Order = order
@@ -114,6 +115,7 @@ namespace Tenderhack.Core.Services
 
       var items = _dbContext.Value.Orders.AsNoTracking()
         .Include(p => p.Product)
+          .ThenInclude(p => p.Category)
         .Where(p =>
           p.Contract.Provider.Inn == inn &&
           p.Contract.Provider.Kpp.StartsWith(kppRegion) &&
@@ -128,7 +130,7 @@ namespace Tenderhack.Core.Services
           Score = _predictionEnginePool.Predict("PredictQuantity", new PredictQuantityInput()
           {
             CustomerRegion = kppRegionNumber,
-            CpgzCode = order.Product.CpgzCode,
+            Kpgz = order.Product.Category.Kpgz,
             Season = season
           }).Score,
           Order = order

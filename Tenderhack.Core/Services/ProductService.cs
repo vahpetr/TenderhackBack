@@ -218,10 +218,10 @@ namespace Tenderhack.Core.Services
         query = query.Where(p => externalIds.Contains(p.ExternalId));
       }
 
-      if (filter.CpgzCode != null)
+      if (filter.CategoryIds != null && filter.CategoryIds.Count != 0)
       {
-        var like = $"%{filter.CpgzCode}";
-        query = query.Where(p => EF.Functions.ILike(p.CpgzCode, like));
+        var categoryIds = filter.CategoryIds;
+        query = query.Where(p => categoryIds.Contains(p.CategoryId));
       }
 
       var q = filter.Q?.Trim().ToLower();

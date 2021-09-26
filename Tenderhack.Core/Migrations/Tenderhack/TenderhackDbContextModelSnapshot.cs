@@ -30,6 +30,11 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Kpgz")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(511)
@@ -37,8 +42,10 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Title")
+                    b.HasIndex("Kpgz")
                         .IsUnique();
+
+                    b.HasIndex("Title");
 
                     b.ToTable("Categories");
                 });
@@ -198,11 +205,6 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("CpgzCode")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
                     b.Property<int>("ExternalId")
                         .HasColumnType("integer");
 
@@ -214,8 +216,6 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("CpgzCode");
 
                     b.HasIndex("ExternalId")
                         .IsUnique();

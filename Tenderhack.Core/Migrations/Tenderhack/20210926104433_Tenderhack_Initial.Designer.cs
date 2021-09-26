@@ -12,7 +12,7 @@ using Tenderhack.Core.Data.TenderhackDbContext;
 namespace Tenderhack.Core.Migrations.Tenderhack
 {
     [DbContext(typeof(TenderhackDbContext))]
-    [Migration("20210925141021_Tenderhack_Initial")]
+    [Migration("20210926104433_Tenderhack_Initial")]
     partial class Tenderhack_Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,11 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Kpgz")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(511)
@@ -39,8 +44,10 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Title")
+                    b.HasIndex("Kpgz")
                         .IsUnique();
+
+                    b.HasIndex("Title");
 
                     b.ToTable("Categories");
                 });
@@ -200,11 +207,6 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("CpgzCode")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
                     b.Property<int>("ExternalId")
                         .HasColumnType("integer");
 
@@ -216,8 +218,6 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("CpgzCode");
 
                     b.HasIndex("ExternalId")
                         .IsUnique();

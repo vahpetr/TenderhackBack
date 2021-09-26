@@ -10,6 +10,9 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Models
         [Required, MaxLength(511)]
         public string Title { get; set; }
 
+        [Required, MaxLength(32)]
+        public string Kpgz { get; set; }
+
         [JsonIgnore]
         public ICollection<Product> Products { get; set; } = new List<Product>();
     }

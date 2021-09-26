@@ -10,7 +10,6 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Configurations
         {
             builder.HasIndex(p => p.ExternalId).IsUnique();
             builder.HasIndex(p => p.Name);
-            builder.HasIndex(p => p.CpgzCode);
 
             builder.HasOne(p => p.Category)
               .WithMany(p => p.Products)

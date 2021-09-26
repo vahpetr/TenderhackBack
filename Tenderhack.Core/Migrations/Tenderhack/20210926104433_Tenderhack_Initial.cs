@@ -16,7 +16,8 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Title = table.Column<string>(type: "character varying(511)", maxLength: 511, nullable: false)
+                    Title = table.Column<string>(type: "character varying(511)", maxLength: 511, nullable: false),
+                    Kpgz = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -61,8 +62,7 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ExternalId = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(511)", maxLength: 511, nullable: false),
-                    CategoryId = table.Column<int>(type: "integer", nullable: false),
-                    CpgzCode = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
+                    CategoryId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -153,10 +153,15 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Categories_Kpgz",
+                table: "Categories",
+                column: "Kpgz",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Categories_Title",
                 table: "Categories",
-                column: "Title",
-                unique: true);
+                column: "Title");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Characteristics_ExternalId",
@@ -242,11 +247,6 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 name: "IX_Products_CategoryId",
                 table: "Products",
                 column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_CpgzCode",
-                table: "Products",
-                column: "CpgzCode");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_ExternalId",

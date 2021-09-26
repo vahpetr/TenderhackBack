@@ -17,7 +17,7 @@ namespace Tenderhack.PredictQuantity.ConsoleApp
             PredictQuantityInput sampleData = new PredictQuantityInput()
             {
                 CustomerRegion = 77F,
-                CpgzCode = @"01.15.01.01.01.01",
+                Kpgz = @"01.15.01.01.01.01",
                 Season = @"3Лето",
             };
 
@@ -26,7 +26,7 @@ namespace Tenderhack.PredictQuantity.ConsoleApp
 
             Console.WriteLine("Using model to make single prediction -- Comparing actual Quantity with predicted Quantity from sample data...\n\n");
             Console.WriteLine($"Customer_region: {sampleData.CustomerRegion}");
-            Console.WriteLine($"Kpgz: {sampleData.CpgzCode}");
+            Console.WriteLine($"Kpgz: {sampleData.Kpgz}");
             Console.WriteLine($"Season: {sampleData.Season}");
             Console.WriteLine($"\n\nPredicted Quantity: {predictionResult.Score}\n\n");
             Console.WriteLine("=============== End of process, hit any key to finish ===============");

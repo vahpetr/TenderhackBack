@@ -453,9 +453,9 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 
-temp_pg_data
-
 # my
+temp_pg_data
 *.csv
 *.zip
 !MLModel.zip
+temp_pg_data_old
