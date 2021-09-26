@@ -1,0 +1,62 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8179B06B-5B28-4BD8-8AF9-2633AA596CDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenderhack.Api", "Tenderhack.Api\Tenderhack.Api.csproj", "{B035D5B5-32B4-4639-BD3A-E82C80B850D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenderhack.Core", "Tenderhack.Core\Tenderhack.Core.csproj", "{6FE22C8B-32ED-4D1D-A119-978D1F20F36E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenderhack.ProductLoader", "Tenderhack.ProductLoader\Tenderhack.ProductLoader.csproj", "{14A26C5B-FF96-49DD-B031-AFE48746EE81}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenderhack.ContractLoader", "Tenderhack.ContractLoader\Tenderhack.ContractLoader.csproj", "{B0752234-B5D0-4CA4-B99F-92F835D71044}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenderhack.PredictQuantity.Model", "Tenderhack.PredictQuantity.Model\Tenderhack.PredictQuantity.Model.csproj", "{330A8718-5D2E-4EEA-86DA-33C281B5567E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenderhack.PredictQuantity.ConsoleApp", "Tenderhack.PredictQuantity.ConsoleApp\Tenderhack.PredictQuantity.ConsoleApp.csproj", "{43D781FE-CB45-485F-843B-BB14B0724586}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B035D5B5-32B4-4639-BD3A-E82C80B850D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B035D5B5-32B4-4639-BD3A-E82C80B850D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B035D5B5-32B4-4639-BD3A-E82C80B850D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B035D5B5-32B4-4639-BD3A-E82C80B850D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FE22C8B-32ED-4D1D-A119-978D1F20F36E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FE22C8B-32ED-4D1D-A119-978D1F20F36E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FE22C8B-32ED-4D1D-A119-978D1F20F36E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FE22C8B-32ED-4D1D-A119-978D1F20F36E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14A26C5B-FF96-49DD-B031-AFE48746EE81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14A26C5B-FF96-49DD-B031-AFE48746EE81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14A26C5B-FF96-49DD-B031-AFE48746EE81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14A26C5B-FF96-49DD-B031-AFE48746EE81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0752234-B5D0-4CA4-B99F-92F835D71044}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0752234-B5D0-4CA4-B99F-92F835D71044}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0752234-B5D0-4CA4-B99F-92F835D71044}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0752234-B5D0-4CA4-B99F-92F835D71044}.Release|Any CPU.Build.0 = Release|Any CPU
+		{330A8718-5D2E-4EEA-86DA-33C281B5567E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{330A8718-5D2E-4EEA-86DA-33C281B5567E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{330A8718-5D2E-4EEA-86DA-33C281B5567E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{330A8718-5D2E-4EEA-86DA-33C281B5567E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43D781FE-CB45-485F-843B-BB14B0724586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43D781FE-CB45-485F-843B-BB14B0724586}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43D781FE-CB45-485F-843B-BB14B0724586}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43D781FE-CB45-485F-843B-BB14B0724586}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B035D5B5-32B4-4639-BD3A-E82C80B850D5} = {8179B06B-5B28-4BD8-8AF9-2633AA596CDD}
+		{6FE22C8B-32ED-4D1D-A119-978D1F20F36E} = {8179B06B-5B28-4BD8-8AF9-2633AA596CDD}
+		{14A26C5B-FF96-49DD-B031-AFE48746EE81} = {8179B06B-5B28-4BD8-8AF9-2633AA596CDD}
+		{B0752234-B5D0-4CA4-B99F-92F835D71044} = {8179B06B-5B28-4BD8-8AF9-2633AA596CDD}
+		{330A8718-5D2E-4EEA-86DA-33C281B5567E} = {8179B06B-5B28-4BD8-8AF9-2633AA596CDD}
+		{43D781FE-CB45-485F-843B-BB14B0724586} = {8179B06B-5B28-4BD8-8AF9-2633AA596CDD}
+	EndGlobalSection
+EndGlobal
