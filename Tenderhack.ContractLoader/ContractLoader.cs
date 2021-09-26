@@ -47,8 +47,8 @@ namespace Tenderhack.ContractLoader
       //   Console.WriteLine(++i);
       // }
 
-      var batchSize = 1;//10000;
-      var count = 0;//externalIds.Count;
+      var batchSize = 10000;
+      var count = 0;
       var savedBatchSize = (int)((float)count/(float)batchSize);
       var batchIndex = 0;
       foreach (var c in contracts)
