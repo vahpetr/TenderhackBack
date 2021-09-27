@@ -29,17 +29,17 @@ namespace Tenderhack.Core.Services
     private async Task TransactionSeedAsync(CancellationToken cancellationToken = default)
     {
       var context = (DbContext)_dbContext;
-      await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+      await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
       try
       {
-        await SeedAsync(cancellationToken);
+        await SeedAsync(cancellationToken).ConfigureAwait(false);
 
-        await transaction.CommitAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
       }
       catch (Exception)
       {
-        await transaction.RollbackAsync(cancellationToken);
+        await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
       }
     }
 
@@ -54,7 +54,7 @@ namespace Tenderhack.Core.Services
 
         context.Database.SetCommandTimeout(timeout);
 
-        await TransactionSeedAsync(cancellationToken);
+        await TransactionSeedAsync(cancellationToken).ConfigureAwait(false);
 
         context.Database.SetCommandTimeout(originalTimeout);
 
@@ -76,13 +76,13 @@ namespace Tenderhack.Core.Services
         var context = (DbContext)_dbContext;
         var originalTimeout = context.Database.GetCommandTimeout();
 
-        var migrations = (await context.Database.GetPendingMigrationsAsync(cancellationToken))
+        var migrations = (await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false))
           .ToList();
         if (migrations.Count > 0)
         {
           context.Database.SetCommandTimeout(timeout);
 
-          await context.Database.MigrateAsync(cancellationToken);
+          await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
 
           context.Database.SetCommandTimeout(originalTimeout);
 

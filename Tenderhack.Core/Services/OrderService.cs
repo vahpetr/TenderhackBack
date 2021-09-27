@@ -150,10 +150,10 @@ namespace Tenderhack.Core.Services
         query = query.Where(p => contractCustomerIds.Contains(p.Contract.CustomerId));
       }
 
-      if (filter.ContractProviderIds != null && filter.ContractProviderIds.Count != 0)
+      if (filter.ContractProducerIds != null && filter.ContractProducerIds.Count != 0)
       {
-        var contractProviderIds = filter.ContractProviderIds;
-        query = query.Where(p => p.Contract.ProviderId.HasValue && contractProviderIds.Contains(p.Contract.ProviderId.Value));
+        var contractProducerIds = filter.ContractProducerIds;
+        query = query.Where(p => p.Contract.ProducerId.HasValue && contractProducerIds.Contains(p.Contract.ProducerId.Value));
       }
 
       return query;

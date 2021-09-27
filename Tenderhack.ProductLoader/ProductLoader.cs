@@ -1,5 +1,5 @@
-using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,58 +11,61 @@ namespace Tenderhack.ProductLoader
   public class ProductLoader
   {
     private readonly TenderhackDbContext _dbContext;
-    private readonly TenderhackDbContextMigrator _migrator;
     private readonly ProductService _productService;
     private readonly ILogger<ProductLoader> _logger;
 
-    public ProductLoader(TenderhackDbContext dbContext, TenderhackDbContextMigrator migrator, ProductService productService, ILogger<ProductLoader> logger)
+    public ProductLoader(TenderhackDbContext dbContext, ProductService productService, ILogger<ProductLoader> logger)
     {
       _dbContext = dbContext;
-      _migrator = migrator;
       _productService = productService;
       _logger = logger;
     }
 
-    public async Task Run(string[] args)
+    public async Task RunAsync(string[] args, CancellationToken cancellationToken = default)
     {
-      await _migrator.MigrateAsync();
-      var externalIds = await _dbContext.Products.Select(p => p.ExternalId).ToListAsync();
+      var externalIds = await _dbContext.Products
+        .Select(p => p.ExternalId)
+        .ToListAsync(cancellationToken)
+        .ConfigureAwait(false);
       var externalIdsSet = externalIds.ToHashSet();
-      var categories = _dbContext.Categories.ToDictionary(p => p.Kpgz);
-      var characteristics = _dbContext.Characteristics.ToDictionary(p => $"{p.Name}_{p.Value}");
+      var categories = await _dbContext.Categories
+        .ToDictionaryAsync(p => p.Kpgz, cancellationToken)
+        .ConfigureAwait(false);
+      var characteristics = await _dbContext.Characteristics
+        .ToDictionaryAsync(p => $"{p.Name}_{p.Value}", cancellationToken)
+        .ConfigureAwait(false);
+
       // https://medium.com/@matias.paulo84/high-performance-csv-parser-with-system-io-pipelines-3678d4a5217a
       var parser = new ProductParser();
       var products = parser.Parse(args[0], externalIdsSet, categories, characteristics);
 
-      // var i = 0;
-      // foreach (var p in products)
-      // {
-      //   Console.WriteLine($"{p.ExternalId} {p.Category.Title} {p.CpgzCode}");
-      //
-      //   foreach (var c in p.Characteristics)
-      //   {
-      //     Console.WriteLine($" - {c.Id} {c.Name} {c.Value}");
-      //   }
-      //   Console.WriteLine(++i);
-      // }
-
       var batchSize = 10000;
-      var count = externalIds.Count;
-      var savedBatchSize = (int)((float)count/(float)batchSize);
+      var total = externalIds.Count;
+      var savedBatchSize = (int)((float)total/(float)batchSize);
       var batchIndex = 0;
-      foreach (var p in products)
+
+      foreach (var product in products)
       {
-        _productService.AddItem(p);
-        count++;
-        Console.WriteLine($"index: {count}");
+        _productService.AddItem(product);
+        total++;
+        _logger.LogInformation("Total: {Total}", total);
+
         if (++batchIndex == batchSize)
         {
-          await _dbContext.SaveChangesAsync();
+          await _dbContext.SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
+
           batchIndex = 0;
           savedBatchSize++;
-          Console.WriteLine($"index: {count}, savedBatchSize: {savedBatchSize}");
+          _logger.LogInformation("Total: {Total}, SavedBatchSize: {SavedBatchSize}", total, savedBatchSize);
         }
       }
+
+      await _dbContext.SaveChangesAsync(cancellationToken)
+        .ConfigureAwait(false);
+
+      savedBatchSize++;
+      _logger.LogInformation("Total: {Total}, SavedBatchSize: {SavedBatchSize}", total, savedBatchSize);
     }
   }
 }

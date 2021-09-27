@@ -85,7 +85,7 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     ConclusionAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     CustomerId = table.Column<int>(type: "integer", nullable: false),
-                    ProviderId = table.Column<int>(type: "integer", nullable: true)
+                    ProducerId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -96,8 +96,8 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                         principalTable: "Organizations",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Contracts_Organizations_ProviderId",
-                        column: x => x.ProviderId,
+                        name: "FK_Contracts_Organizations_ProducerId",
+                        column: x => x.ProducerId,
                         principalTable: "Organizations",
                         principalColumn: "Id");
                 });
@@ -199,9 +199,9 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 column: "Price");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Contracts_ProviderId",
+                name: "IX_Contracts_ProducerId",
                 table: "Contracts",
-                column: "ProviderId");
+                column: "ProducerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contracts_PublicAt",

@@ -1,9 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Tenderhack.ContractLoader;
 using Tenderhack.Core.Data.TenderhackDbContext;
 using Tenderhack.Core.Services;
+
+var isDebug = args.Contains("--debug");
+var connectionString =
+  "Host=127.0.0.1;Port=5432;Username=tenderhack_user;Password=tenderhack_pass;Database=tenderhack_db";
 
 var services = new ServiceCollection()
   .AddLogging(builder =>
@@ -13,13 +18,10 @@ var services = new ServiceCollection()
   })
   .AddDbContext<TenderhackDbContext>(options =>
   {
-    var isDebug = true;
     options
       .EnableSensitiveDataLogging(isDebug)
       .EnableDetailedErrors(isDebug);
 
-    var connectionString =
-      "Host=127.0.0.1;Port=5432;Username=tenderhack_user;Password=tenderhack_pass;Database=tenderhack_db";
     options.UseNpgsql(connectionString, npgsqlOptions =>
     {
       npgsqlOptions
@@ -39,4 +41,5 @@ var services = new ServiceCollection()
 var provider = services.BuildServiceProvider();
 
 using var scope = provider.CreateScope();
-await scope.ServiceProvider.GetRequiredService<ContractLoader>().Run(args);
+await scope.ServiceProvider.GetRequiredService<TenderhackDbContextMigrator>().MigrateAsync().ConfigureAwait(false);
+await scope.ServiceProvider.GetRequiredService<ContractLoader>().RunAsync(args).ConfigureAwait(false);

@@ -23,8 +23,8 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Models
         public Organization Customer { get; set; }
 
         [JsonIgnore]
-        public int? ProviderId { get; set; }
-        public Organization? Provider { get; set; }
+        public int? ProducerId { get; set; }
+        public Organization? Producer { get; set; }
 
         public ICollection<Order> Orders { get; set; } = new List<Order>();
     }

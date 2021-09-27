@@ -81,7 +81,7 @@ services.AddDbContextPool<TenderhackDbContext>(options =>
         npgsqlOptions
             .CommandTimeout(60) // 60 sec
             .MinBatchSize(1)
-            .MaxBatchSize(100);
+            .MaxBatchSize(1000);
     });
 }, 1024);
 services.AddResponseCaching(options =>
@@ -191,7 +191,8 @@ if (args.Contains("--migrate"))
         var cts = new CancellationTokenSource();
         cts.CancelAfter(timeout * 1000);
         await scope.ServiceProvider.GetRequiredService<TenderhackDbContextMigrator>()
-            .MigrateAsync(timeout, cts.Token);
+            .MigrateAsync(timeout, cts.Token)
+            .ConfigureAwait(false);
     }
 }
 
@@ -203,7 +204,8 @@ if (args.Contains("--seed"))
         var cts = new CancellationTokenSource();
         cts.CancelAfter(timeout * 1000);
         await scope.ServiceProvider.GetRequiredService<TenderhackDbContextMigrator>()
-            .SeedAsync(timeout, cts.Token);
+            .SeedAsync(timeout, cts.Token)
+            .ConfigureAwait(false);
     }
 }
 

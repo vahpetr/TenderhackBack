@@ -12,7 +12,7 @@ namespace Tenderhack.ProductLoader
 {
   public class ProductParser
   {
-    public IEnumerable<Product> Parse(string filePath, HashSet<int> externalIds, Dictionary<string, Category> categories, Dictionary<string, Core.Data.TenderhackDbContext.Models.Characteristic> characteristics)
+    public IEnumerable<Product> Parse(string filePath, HashSet<int> externalIds, Dictionary<string, Category> categories, Dictionary<string, Characteristic> characteristics)
     {
       var options = new JsonSerializerOptions
       {
@@ -51,7 +51,6 @@ namespace Tenderhack.ProductLoader
         var categoryKpgz = csv.GetField<string>(3);
         if (string.IsNullOrWhiteSpace(categoryKpgz) || categoryKpgz.Length > 32)
         {
-          // skip
           continue;
         }
 
@@ -74,9 +73,8 @@ namespace Tenderhack.ProductLoader
             rawCharacteristic = JsonSerializer.Deserialize<IList<RawCharacteristic>>(json, options);
           }
         }
-        catch (Exception e)
+        catch (Exception)
         {
-          // skip
           continue;
         }
 

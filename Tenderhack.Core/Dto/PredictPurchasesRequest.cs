@@ -9,11 +9,9 @@ namespace Tenderhack.Core.Dto
     public string Inn { get; set; }
     [Required]
     public string Kpp { get; set; }
-    [Range(1, 100), DefaultValue(20)]
-    public int Take { get; set; } = 20;
+    [Range(1, 1000), DefaultValue(100)]
+    public int Take { get; set; } = 100;
     [Range(int.MinValue, -1), DefaultValue(-1)]
     public int YearOffset { get; set; } = -1;
-
-    // public string? CpgzCode { get; set; }
   }
 }

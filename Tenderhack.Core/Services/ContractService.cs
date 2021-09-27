@@ -30,7 +30,7 @@ namespace Tenderhack.Core.Services
     {
       var query = _dbContext.Contracts
         .Include(p => p.Customer)
-        .Include(p => p.Provider)
+        .Include(p => p.Producer)
         .Include(p => p.Orders.OrderBy(t => t.Id))
         .AsNoTracking();
 
@@ -87,7 +87,7 @@ namespace Tenderhack.Core.Services
         .ConfigureAwait(false);
 
       await _dbContext.Entry(item)
-        .Reference(b => b.Provider)
+        .Reference(b => b.Producer)
         .LoadAsync(cancellationToken)
         .ConfigureAwait(false);
 
@@ -99,7 +99,7 @@ namespace Tenderhack.Core.Services
       var item = await _dbContext.Contracts
         .AsNoTracking()
         .Include(p => p.Customer)
-        .Include(p => p.Provider)
+        .Include(p => p.Producer)
         .Include(p => p.Orders.OrderBy(t => t.Id))
         .AsSplitQuery()
         .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
@@ -260,10 +260,10 @@ namespace Tenderhack.Core.Services
         query = query.Where(p => customerIds.Contains(p.CustomerId));
       }
 
-      if (filter.ProviderIds != null && filter.ProviderIds.Count != 0)
+      if (filter.ProducerIds != null && filter.ProducerIds.Count != 0)
       {
-        var providerIds = filter.ProviderIds;
-        query = query.Where(p => p.ProviderId.HasValue && providerIds.Contains(p.ProviderId.Value));
+        var producerIds = filter.ProducerIds;
+        query = query.Where(p => p.ProducerId.HasValue && producerIds.Contains(p.ProducerId.Value));
       }
 
       var q = filter.Q?.Trim().ToLower();

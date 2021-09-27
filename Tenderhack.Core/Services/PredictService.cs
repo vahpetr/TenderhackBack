@@ -117,8 +117,8 @@ namespace Tenderhack.Core.Services
         .Include(p => p.Product)
           .ThenInclude(p => p.Category)
         .Where(p =>
-          p.Contract.Provider.Inn == inn &&
-          p.Contract.Provider.Kpp.StartsWith(kppRegion) &&
+          p.Contract.Producer.Inn == inn &&
+          p.Contract.Producer.Kpp.StartsWith(kppRegion) &&
           p.Contract.PublicAt >= minPublicAt &&
           p.Contract.PublicAt < maxPublicAt
         )

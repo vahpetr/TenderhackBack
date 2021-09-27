@@ -22,7 +22,7 @@ namespace Tenderhack.Core.Dto
 
     public List<int>? CustomerIds { get; set; }
 
-    public List<int>? ProviderIds { get; set; }
+    public List<int>? ProducerIds { get; set; }
 
     public List<int>? Ids { get; set; }
   }

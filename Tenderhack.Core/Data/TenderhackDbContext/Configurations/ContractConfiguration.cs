@@ -20,9 +20,9 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Configurations
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder
-                .HasOne(p => p.Provider)
+                .HasOne(p => p.Producer)
                 .WithMany(p => p.SaleHistory)
-                .HasForeignKey(p => p.ProviderId)
+                .HasForeignKey(p => p.ProducerId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

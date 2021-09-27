@@ -12,7 +12,7 @@ namespace Tenderhack.ContractLoader
 {
   public class ContractParser
   {
-    public IEnumerable<Contract> Parse(string filePath, Dictionary<string, Organization> organizations, Dictionary<int, int> productMap)
+    public IEnumerable<Contract> Parse(string filePath, Dictionary<string, Organization> organizations, Dictionary<int, int> products)
     {
       var options = new JsonSerializerOptions
       {
@@ -28,7 +28,6 @@ namespace Tenderhack.ContractLoader
 
       csv.Read();
       csv.ReadHeader();
-      // var i = 0;
       while (csv.Read())
       {
         var number = csv.GetField<string>(0);
@@ -44,7 +43,6 @@ namespace Tenderhack.ContractLoader
         }
         publicAt = publicAt.ToUniversalTime();
 
-        // ConclusionAt
         var conclusionAtString = csv.GetField<string>(2);
         if (!DateTime.TryParseExact(conclusionAtString, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var conclusionAt))
         {
@@ -72,21 +70,18 @@ namespace Tenderhack.ContractLoader
         var customerInn = csv.GetField<string>(4);
         if (string.IsNullOrWhiteSpace(customerInn) || customerInn.Length > 12)
         {
-          // skip
           continue;
         }
 
         var customerKpp = csv.GetField<string>(5);
         if (string.IsNullOrWhiteSpace(customerKpp) || customerKpp.Length > 9)
         {
-          // skip
           continue;
         }
 
         var customerName = csv.GetField<string>(6);
         if (string.IsNullOrWhiteSpace(customerName) || customerName.Length > 511)
         {
-          // skip
           continue;
         }
 
@@ -102,37 +97,34 @@ namespace Tenderhack.ContractLoader
           organizations.Add(customerKey, customer);
         }
 
-        var providerInn = csv.GetField<string>(7);
-        if (string.IsNullOrWhiteSpace(providerInn) || providerInn.Length > 12)
+        var producerInn = csv.GetField<string>(7);
+        if (string.IsNullOrWhiteSpace(producerInn) || producerInn.Length > 12)
         {
-          // skip
           continue;
         }
 
-        var providerKpp = csv.GetField<string>(8);
-        if (string.IsNullOrWhiteSpace(providerKpp) || providerKpp.Length > 9)
+        var producerKpp = csv.GetField<string>(8);
+        if (string.IsNullOrWhiteSpace(producerKpp) || producerKpp.Length > 9)
         {
-          // skip
           continue;
         }
 
-        var providerName = csv.GetField<string>(9);
-        if (string.IsNullOrWhiteSpace(providerName) || providerName.Length > 511)
+        var producerName = csv.GetField<string>(9);
+        if (string.IsNullOrWhiteSpace(producerName) || producerName.Length > 511)
         {
-          // skip
           continue;
         }
 
-        var providerKey = $"{providerInn}_{providerKpp}";
-        if (!organizations.TryGetValue(providerKey, out var provider))
+        var producerKey = $"{producerInn}_{producerKpp}";
+        if (!organizations.TryGetValue(producerKey, out var producer))
         {
-          provider = new Organization()
+          producer = new Organization()
           {
-            Name = providerName,
-            Inn = providerInn,
-            Kpp = providerKpp
+            Name = producerName,
+            Inn = producerInn,
+            Kpp = producerKpp
           };
-          organizations.Add(providerKey, provider);
+          organizations.Add(producerKey, producer);
         }
 
         var json = csv.GetField<string>(10);
@@ -146,13 +138,12 @@ namespace Tenderhack.ContractLoader
         }
         catch (Exception)
         {
-          // skip
           continue;
         }
 
         rawOrder = rawOrder
           .Where(p => p.Id > 0 && p.Amount > 0 && p.Quantity > 0 &&
-                      (!p.Id.HasValue || productMap.ContainsKey(p.Id.Value)))
+                      (!p.Id.HasValue || products.ContainsKey(p.Id.Value)))
           .ToList();
 
         if (rawOrder.Count() == 0)
@@ -167,11 +158,11 @@ namespace Tenderhack.ContractLoader
           ConclusionAt = conclusionAt,
           Price = price,
           Customer = customer,
-          Provider = provider,
+          Producer = producer,
           Orders = rawOrder
             .Select(p => new Order()
           {
-              ProductId = p.Id.HasValue ? productMap[p.Id.Value] : null,
+              ProductId = p.Id.HasValue ? products[p.Id.Value] : null,
               Quantity = p.Quantity,
               Amount = p.Amount
           }).ToList()

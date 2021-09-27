@@ -12,7 +12,7 @@ using Tenderhack.Core.Data.TenderhackDbContext;
 namespace Tenderhack.Core.Migrations.Tenderhack
 {
     [DbContext(typeof(TenderhackDbContext))]
-    [Migration("20210926104433_Tenderhack_Initial")]
+    [Migration("20210927073759_Tenderhack_Initial")]
     partial class Tenderhack_Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -106,7 +106,7 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
-                    b.Property<int?>("ProviderId")
+                    b.Property<int?>("ProducerId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("PublicAt")
@@ -122,7 +122,7 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     b.HasIndex("Price");
 
-                    b.HasIndex("ProviderId");
+                    b.HasIndex("ProducerId");
 
                     b.HasIndex("PublicAt");
 
@@ -250,14 +250,14 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.Organization", "Provider")
+                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.Organization", "Producer")
                         .WithMany("SaleHistory")
-                        .HasForeignKey("ProviderId")
+                        .HasForeignKey("ProducerId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Customer");
 
-                    b.Navigation("Provider");
+                    b.Navigation("Producer");
                 });
 
             modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Order", b =>
