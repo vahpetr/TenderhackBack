@@ -25,21 +25,6 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 });
 
             migrationBuilder.CreateTable(
-                name: "Characteristics",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ExternalId = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(511)", maxLength: 511, nullable: false),
-                    Value = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Characteristics", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Organizations",
                 columns: table => new
                 {
@@ -52,6 +37,32 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Organizations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductAttributes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(511)", maxLength: 511, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductAttributes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductValues",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductValues", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -103,25 +114,77 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductsCharacteristics",
+                name: "ProductProperties",
                 columns: table => new
                 {
                     ProductId = table.Column<int>(type: "integer", nullable: false),
-                    CharacteristicId = table.Column<int>(type: "integer", nullable: false)
+                    AttributeId = table.Column<int>(type: "integer", nullable: false),
+                    ValueId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductsCharacteristics", x => new { x.ProductId, x.CharacteristicId });
+                    table.PrimaryKey("PK_ProductProperties", x => new { x.ProductId, x.AttributeId, x.ValueId });
                     table.ForeignKey(
-                        name: "FK_ProductsCharacteristics_Characteristics_CharacteristicId",
-                        column: x => x.CharacteristicId,
-                        principalTable: "Characteristics",
+                        name: "FK_ProductProperties_ProductAttributes_AttributeId",
+                        column: x => x.AttributeId,
+                        principalTable: "ProductAttributes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductProperties_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductProperties_ProductValues_ValueId",
+                        column: x => x.ValueId,
+                        principalTable: "ProductValues",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductsAttributes",
+                columns: table => new
+                {
+                    ProductId = table.Column<int>(type: "integer", nullable: false),
+                    AttributeId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductsAttributes", x => new { x.ProductId, x.AttributeId });
+                    table.ForeignKey(
+                        name: "FK_ProductsAttributes_ProductAttributes_AttributeId",
+                        column: x => x.AttributeId,
+                        principalTable: "ProductAttributes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductsCharacteristics_Products_ProductId",
+                        name: "FK_ProductsAttributes_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductsValues",
+                columns: table => new
+                {
+                    ProductId = table.Column<int>(type: "integer", nullable: false),
+                    ValueId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductsValues", x => new { x.ProductId, x.ValueId });
+                    table.ForeignKey(
+                        name: "FK_ProductsValues_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductsValues_ProductValues_ValueId",
+                        column: x => x.ValueId,
+                        principalTable: "ProductValues",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -132,10 +195,10 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ContractId = table.Column<int>(type: "integer", nullable: false),
+                    ProductId = table.Column<int>(type: "integer", nullable: false),
                     Quantity = table.Column<decimal>(type: "numeric", nullable: false),
-                    Amount = table.Column<decimal>(type: "numeric", nullable: false),
-                    ProductId = table.Column<int>(type: "integer", nullable: true),
-                    ContractId = table.Column<int>(type: "integer", nullable: false)
+                    Amount = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -162,21 +225,6 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 name: "IX_Categories_Title",
                 table: "Categories",
                 column: "Title");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Characteristics_ExternalId",
-                table: "Characteristics",
-                column: "ExternalId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Characteristics_Name",
-                table: "Characteristics",
-                column: "Name");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Characteristics_Value",
-                table: "Characteristics",
-                column: "Value");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contracts_ConclusionAt",
@@ -214,9 +262,9 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 column: "Amount");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_ContractId",
+                name: "IX_Orders_ContractId_ProductId",
                 table: "Orders",
-                column: "ContractId");
+                columns: new[] { "ContractId", "ProductId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_ProductId",
@@ -231,7 +279,8 @@ namespace Tenderhack.Core.Migrations.Tenderhack
             migrationBuilder.CreateIndex(
                 name: "IX_Organizations_Inn_Kpp",
                 table: "Organizations",
-                columns: new[] { "Inn", "Kpp" });
+                columns: new[] { "Inn", "Kpp" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Organizations_Kpp",
@@ -242,6 +291,22 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 name: "IX_Organizations_Name",
                 table: "Organizations",
                 column: "Name");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductAttributes_Name",
+                table: "ProductAttributes",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductProperties_AttributeId",
+                table: "ProductProperties",
+                column: "AttributeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductProperties_ValueId",
+                table: "ProductProperties",
+                column: "ValueId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
@@ -260,9 +325,19 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 column: "Name");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductsCharacteristics_CharacteristicId",
-                table: "ProductsCharacteristics",
-                column: "CharacteristicId");
+                name: "IX_ProductsAttributes_AttributeId",
+                table: "ProductsAttributes",
+                column: "AttributeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductsValues_ValueId",
+                table: "ProductsValues",
+                column: "ValueId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductValues_Name",
+                table: "ProductValues",
+                column: "Name");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -271,16 +346,25 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "ProductsCharacteristics");
+                name: "ProductProperties");
+
+            migrationBuilder.DropTable(
+                name: "ProductsAttributes");
+
+            migrationBuilder.DropTable(
+                name: "ProductsValues");
 
             migrationBuilder.DropTable(
                 name: "Contracts");
 
             migrationBuilder.DropTable(
-                name: "Characteristics");
+                name: "ProductAttributes");
 
             migrationBuilder.DropTable(
                 name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "ProductValues");
 
             migrationBuilder.DropTable(
                 name: "Organizations");

@@ -26,8 +26,7 @@ namespace Tenderhack.Core.Services
       [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
-      var query = _dbContext.Organizations
-        .AsNoTracking();
+      var query = Query(_dbContext.Organizations);
 
       query = ApplyFilter(query, filter);
 
@@ -48,8 +47,7 @@ namespace Tenderhack.Core.Services
 
     public async Task<int> GetCountAsync(OrganizationFilter filter, CancellationToken cancellationToken = default)
     {
-      var query = _dbContext.Organizations
-        .AsNoTracking();
+      var query = _dbContext.Organizations.AsNoTracking();
 
       query = ApplyFilter(query, filter);
 
@@ -60,19 +58,9 @@ namespace Tenderhack.Core.Services
       return count;
     }
 
-    public async Task<Organization?> FindItemAsync(int id, CancellationToken cancellationToken = default)
-    {
-      var item = await _dbContext.Organizations
-        .FindAsync(new object[] { id }, cancellationToken)
-        .ConfigureAwait(false);
-
-      return item;
-    }
-
     public async Task<Organization?> GetItemAsync(int id, CancellationToken cancellationToken = default)
     {
-      var item = await _dbContext.Organizations
-        .AsNoTracking()
+      var item = await Query(_dbContext.Organizations)
         .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
         .ConfigureAwait(false);
 
@@ -95,7 +83,7 @@ namespace Tenderhack.Core.Services
 
       if (item.Id != 0)
       {
-        dbItem = await FindItemAsync(item.Id, cancellationToken)
+        dbItem = await GetItemAsync(item.Id, cancellationToken)
           .ConfigureAwait(false);
       }
 
@@ -130,7 +118,7 @@ namespace Tenderhack.Core.Services
         .ConfigureAwait(false);
     }
 
-    private IQueryable<Organization> ApplyFilter(IQueryable<Organization> query, OrganizationFilter filter)
+    private static IQueryable<Organization> ApplyFilter(IQueryable<Organization> query, OrganizationFilter filter)
     {
       if (filter.Ids != null && filter.Ids.Count != 0)
       {
@@ -193,6 +181,11 @@ namespace Tenderhack.Core.Services
     private static IQueryable<Organization> ApplyPaging(IQueryable<Organization> query, Paging paging)
     {
       return query.Skip(paging.Skip).Take(paging.Take);
+    }
+
+    private static IQueryable<Organization> Query(IQueryable<Organization> query)
+    {
+      return query.AsNoTracking();
     }
   }
 }

@@ -12,7 +12,13 @@ namespace Tenderhack.ProductLoader
 {
   public class ProductParser
   {
-    public IEnumerable<Product> Parse(string filePath, HashSet<int> externalIds, Dictionary<string, Category> categories, Dictionary<string, Characteristic> characteristics)
+    public IEnumerable<Product> Parse(
+      string filePath,
+      HashSet<int> externalIds,
+      Dictionary<string, Category> categories,
+      Dictionary<string, ProductAttribute> attributes,
+      Dictionary<string, ProductValue> values
+      )
     {
       var options = new JsonSerializerOptions
       {
@@ -36,19 +42,19 @@ namespace Tenderhack.ProductLoader
           continue;
         }
 
-        var name = csv.GetField<string>(1);
+        var name = csv.GetField<string>(1)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(name) || name.Length > 511)
         {
           continue;
         }
 
-        var categoryTitle = csv.GetField<string>(2);
+        var categoryTitle = csv.GetField<string>(2)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(categoryTitle))
         {
           continue;
         }
 
-        var categoryKpgz = csv.GetField<string>(3);
+        var categoryKpgz = csv.GetField<string>(3)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(categoryKpgz) || categoryKpgz.Length > 32)
         {
           continue;
@@ -65,12 +71,12 @@ namespace Tenderhack.ProductLoader
         }
 
         var json = csv.GetField<string>(4);
-        var rawCharacteristic = Enumerable.Empty<RawCharacteristic>();
+        var rawProperties = Enumerable.Empty<RawProperty>();
         try
         {
           if (!string.IsNullOrWhiteSpace(json))
           {
-            rawCharacteristic = JsonSerializer.Deserialize<IList<RawCharacteristic>>(json, options);
+            rawProperties = JsonSerializer.Deserialize<IList<RawProperty>>(json, options);
           }
         }
         catch (Exception)
@@ -78,30 +84,65 @@ namespace Tenderhack.ProductLoader
           continue;
         }
 
-        yield return new Product()
+        var product = new Product()
         {
           ExternalId = externalId,
           Name = name,
           Category = category,
-          Characteristics = rawCharacteristic
+          Properties = rawProperties
             .Where(p =>  p.Name.Length <= 511 && p.Value != null && p.Value.Length <= 255 && p.Id > 0)
-            .Select(p => {
-              var characteristicKey = $"{p.Name}_{p.Value}";
-              if (!characteristics.TryGetValue(characteristicKey, out var characteristic))
+            .Select(p =>
+            {
+              p.Name = p.Name.Trim().Trim('\"');
+              p.Value = p.Value.Trim().Trim('\"');
+
+              var attributeKey = GetFixedPropertyName(p.Id, p.Name);
+              if (!attributes.TryGetValue(attributeKey, out var attribute))
               {
-                characteristic = new Characteristic()
+                attribute = new ProductAttribute()
                 {
-                  ExternalId = p.Id,
-                  Name = p.Name,
-                  Value = p.Value,
+                    Name = p.Name
                 };
-                characteristics.Add(characteristicKey, characteristic);
+                attributes.Add(attributeKey, attribute);
               }
-              return characteristic;
+
+              var valueKey = $"{attributeKey}_{p.Value}";
+              if (!values.TryGetValue(valueKey, out var value))
+              {
+                value = new ProductValue()
+                {
+                  Name = p.Value
+                };
+                values.Add(valueKey, value);
+              }
+
+              var property = new ProductProperty()
+              {
+                Attribute = attribute,
+                Value = value
+              };
+
+              return property;
             })
+            .DistinctBy(p => new {p.ProductId, p.AttributeId, p.ValueId})
             .ToList()
         };
+
+        product.Attributes = product.Properties.Select(p => p.Attribute).ToList();
+        product.Values = product.Properties.Select(p => p.Value).ToList();
+
+        yield return product;
       }
+    }
+
+    private static string GetFixedPropertyName(int id, string name)
+    {
+      return id switch
+      {
+        284858006 => "Длина",
+        284858014 => "Длина",
+        _ => name
+      };
     }
   }
 }

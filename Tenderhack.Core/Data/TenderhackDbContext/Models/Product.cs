@@ -15,12 +15,19 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Models
         public int CategoryId { get; set; }
         public Category Category { get; set; }
 
-        public ICollection<Characteristic> Characteristics { get; set; } = new List<Characteristic>();
-        [JsonIgnore]
-        public ICollection<Order> Orders { get; set; } = new List<Order>();
+        public ICollection<ProductProperty> Properties { get; set; }
 
         [JsonIgnore]
-        public ICollection<ProductsCharacteristics> ProductsCharacteristics { get; set; } =
-          new List<ProductsCharacteristics>();
+        public ICollection<Order> Orders { get; set; }
+
+        [JsonIgnore]
+        public ICollection<ProductAttribute> Attributes { get; set; }
+        [JsonIgnore]
+        public ICollection<ProductsAttributes> ProductsAttributes { get; set; }
+
+        [JsonIgnore]
+        public ICollection<ProductValue> Values { get; set; }
+        [JsonIgnore]
+        public ICollection<ProductsValues> ProductsValues { get; set; }
     }
 }

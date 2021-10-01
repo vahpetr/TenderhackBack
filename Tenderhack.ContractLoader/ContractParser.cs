@@ -30,7 +30,7 @@ namespace Tenderhack.ContractLoader
       csv.ReadHeader();
       while (csv.Read())
       {
-        var number = csv.GetField<string>(0);
+        var number = csv.GetField<string>(0)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(number))
         {
           continue;
@@ -67,19 +67,19 @@ namespace Tenderhack.ContractLoader
           continue;
         }
 
-        var customerInn = csv.GetField<string>(4);
+        var customerInn = csv.GetField<string>(4)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(customerInn) || customerInn.Length > 12)
         {
           continue;
         }
 
-        var customerKpp = csv.GetField<string>(5);
+        var customerKpp = csv.GetField<string>(5)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(customerKpp) || customerKpp.Length > 9)
         {
           continue;
         }
 
-        var customerName = csv.GetField<string>(6);
+        var customerName = csv.GetField<string>(6)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(customerName) || customerName.Length > 511)
         {
           continue;
@@ -97,19 +97,19 @@ namespace Tenderhack.ContractLoader
           organizations.Add(customerKey, customer);
         }
 
-        var producerInn = csv.GetField<string>(7);
+        var producerInn = csv.GetField<string>(7)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(producerInn) || producerInn.Length > 12)
         {
           continue;
         }
 
-        var producerKpp = csv.GetField<string>(8);
+        var producerKpp = csv.GetField<string>(8)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(producerKpp) || producerKpp.Length > 9)
         {
           continue;
         }
 
-        var producerName = csv.GetField<string>(9);
+        var producerName = csv.GetField<string>(9)?.Trim().Trim('\"');
         if (string.IsNullOrWhiteSpace(producerName) || producerName.Length > 511)
         {
           continue;
@@ -142,11 +142,9 @@ namespace Tenderhack.ContractLoader
         }
 
         rawOrder = rawOrder
-          .Where(p => p.Id > 0 && p.Amount > 0 && p.Quantity > 0 &&
-                      (!p.Id.HasValue || products.ContainsKey(p.Id.Value)))
+          .Where(p => p.Id.HasValue && p.Id > 0 && p.Amount > 0 && p.Quantity > 0 && products.ContainsKey(p.Id.Value))
           .ToList();
-
-        if (rawOrder.Count() == 0)
+        if (!rawOrder.Any())
         {
           continue;
         }
@@ -159,12 +157,11 @@ namespace Tenderhack.ContractLoader
           Price = price,
           Customer = customer,
           Producer = producer,
-          Orders = rawOrder
-            .Select(p => new Order()
+          Orders = rawOrder.Select(p => new Order()
           {
-              ProductId = p.Id.HasValue ? products[p.Id.Value] : null,
-              Quantity = p.Quantity,
-              Amount = p.Amount
+            ProductId = products[p.Id.Value], // product must be database
+            Quantity = p.Quantity,
+            Amount = p.Amount
           }).ToList()
         };
       }

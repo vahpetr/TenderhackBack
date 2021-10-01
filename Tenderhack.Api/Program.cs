@@ -123,7 +123,7 @@ services.AddControllers(options =>
 services.AddScoped<TenderhackDbContextMigrator>();
 
 services.AddTransient(typeof(Lazy<>), typeof(LazyLoader<>))
-  .AddTransient<CharacteristicService>()
+  .AddTransient<PropertyService>()
   .AddTransient<ContractService>()
   .AddTransient<OrderService>()
   .AddTransient<OrganizationService>()

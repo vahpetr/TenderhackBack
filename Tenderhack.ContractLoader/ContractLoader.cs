@@ -33,7 +33,7 @@ namespace Tenderhack.ContractLoader
       var parser = new ContractParser();
       var contracts = parser.Parse(args[0], organizations, products);
 
-      var batchSize = 10000;
+      const int batchSize = 10000;
       var total = 0;
       var savedBatchSize = (int)((float)total/(float)batchSize);
       var batchIndex = 0;
@@ -42,7 +42,7 @@ namespace Tenderhack.ContractLoader
       {
         _contractService.AddItem(contract);
         total++;
-        _logger.LogInformation("Total: {Total}", total);
+        _logger.LogInformation("Total: {Total}, Number: {Number}", total, contract.Number);
 
         if (++batchIndex == batchSize)
         {

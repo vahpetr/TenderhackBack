@@ -4,9 +4,8 @@ namespace Tenderhack.Core.Dto
 {
   public class OrderFilter
   {
-    public List<int>? ProductIds { get; set; }
     public List<int>? Ids { get; set; }
-    public List<int>? ContractProducerIds { get; set; }
-    public List<int>? ContractCustomerIds { get; set; }
+    public List<int>? ProductIds { get; set; }
+    public List<int>? ContractIds { get; set; }
   }
 }

@@ -4,19 +4,16 @@ using System.Text.Json.Serialization;
 
 namespace Tenderhack.Core.Data.TenderhackDbContext.Models
 {
-    public class Organization
+    public class ProductAttribute
     {
         public int Id { get; set; }
         [Required, MaxLength(511)]
         public string Name { get; set; }
-        [Required, MaxLength(12)]
-        public string Inn { get; set; }
-        [Required, MaxLength(9)]
-        public string Kpp { get; set; }
-
         [JsonIgnore]
-        public ICollection<Contract> PurchaseHistory { get; set; }
+        public ICollection<Product> Products { get; set; }
         [JsonIgnore]
-        public ICollection<Contract> SaleHistory { get; set; }
+        public ICollection<ProductProperty> Properties { get; set; }
+        [JsonIgnore]
+        public ICollection<ProductsAttributes> ProductsAttributes { get; set; }
     }
 }

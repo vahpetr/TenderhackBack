@@ -31,15 +31,22 @@ namespace Tenderhack.ProductLoader
       var categories = await _dbContext.Categories
         .ToDictionaryAsync(p => p.Kpgz, cancellationToken)
         .ConfigureAwait(false);
-      var characteristics = await _dbContext.Characteristics
-        .ToDictionaryAsync(p => $"{p.Name}_{p.Value}", cancellationToken)
+      var attributes = await _dbContext.Attributes
+        .ToDictionaryAsync(p => p.Name, cancellationToken)
+        .ConfigureAwait(false);
+      var values = await _dbContext.Properties
+        .ToDictionaryAsync(
+          p => $"{p.Attribute.Name}_{p.Value.Name}",
+          p => p.Value,
+          cancellationToken
+        )
         .ConfigureAwait(false);
 
       // https://medium.com/@matias.paulo84/high-performance-csv-parser-with-system-io-pipelines-3678d4a5217a
       var parser = new ProductParser();
-      var products = parser.Parse(args[0], externalIdsSet, categories, characteristics);
+      var products = parser.Parse(args[0], externalIdsSet, categories, attributes, values);
 
-      var batchSize = 10000;
+      const int batchSize = 10000;
       var total = externalIds.Count;
       var savedBatchSize = (int)((float)total/(float)batchSize);
       var batchIndex = 0;

@@ -26,6 +26,6 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Models
         public int? ProducerId { get; set; }
         public Organization? Producer { get; set; }
 
-        public ICollection<Order> Orders { get; set; } = new List<Order>();
+        public ICollection<Order> Orders { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.ML;
 using Tenderhack.Core.Data.TenderhackDbContext;
+using Tenderhack.Core.Data.TenderhackDbContext.Models;
 using Tenderhack.Core.Dto;
 using Tenderhack.PredictQuantity.Model;
 
@@ -62,9 +63,7 @@ namespace Tenderhack.Core.Services
       var minPublicAt = now.AddYears(request.YearOffset);
       var maxPublicAt = minPublicAt.AddYears(1);
 
-      var items = _dbContext.Value.Orders.AsNoTracking()
-        .Include(p => p.Product)
-          .ThenInclude(p => p.Category)
+      var items = Query(_dbContext.Value.Orders)
         .Where(p =>
             p.Contract.Customer.Inn == inn &&
             p.Contract.Customer.Kpp.StartsWith(kppRegion) &&
@@ -113,9 +112,7 @@ namespace Tenderhack.Core.Services
       var minPublicAt = now.AddYears(request.YearOffset);
       var maxPublicAt = minPublicAt.AddYears(1);
 
-      var items = _dbContext.Value.Orders.AsNoTracking()
-        .Include(p => p.Product)
-          .ThenInclude(p => p.Category)
+      var items = Query(_dbContext.Value.Orders)
         .Where(p =>
           p.Contract.Producer.Inn == inn &&
           p.Contract.Producer.Kpp.StartsWith(kppRegion) &&
@@ -142,6 +139,13 @@ namespace Tenderhack.Core.Services
       {
         yield return item;
       }
+    }
+
+    private static IQueryable<Order> Query(IQueryable<Order> query)
+    {
+      return query.AsNoTracking()
+        .Include(p => p.Product)
+          .ThenInclude(p => p.Category);
     }
   }
 }

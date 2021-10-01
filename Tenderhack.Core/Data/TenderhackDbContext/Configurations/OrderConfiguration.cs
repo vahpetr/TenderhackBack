@@ -8,18 +8,21 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Configurations
     {
         public void Configure(EntityTypeBuilder<Order> builder)
         {
-            builder.HasIndex(p => p.Quantity);
-            builder.HasIndex(p => p.Amount);
+          builder.ToTable("Orders");
 
-            builder.HasOne(p => p.Contract)
-                .WithMany(p => p.Orders)
-                .HasForeignKey(p => p.ContractId)
-                .OnDelete(DeleteBehavior.NoAction);
+          builder.HasIndex(p => new {p.ContractId, p.ProductId});
+          builder.HasIndex(p => p.Quantity);
+          builder.HasIndex(p => p.Amount);
 
-            builder.HasOne(p => p.Product)
+          builder.HasOne(p => p.Contract)
               .WithMany(p => p.Orders)
-              .HasForeignKey(p => p.ProductId)
+              .HasForeignKey(p => p.ContractId)
               .OnDelete(DeleteBehavior.NoAction);
+
+          builder.HasOne(p => p.Product)
+            .WithMany(p => p.Orders)
+            .HasForeignKey(p => p.ProductId)
+            .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

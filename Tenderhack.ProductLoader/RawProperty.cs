@@ -1,6 +1,6 @@
 namespace Tenderhack.ProductLoader
 {
-  public class RawCharacteristic
+  public class RawProperty
   {
     public int Id { get; set; }
     public string Name { get; set; }

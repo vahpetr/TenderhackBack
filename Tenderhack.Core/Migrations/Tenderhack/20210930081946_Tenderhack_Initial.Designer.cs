@@ -12,7 +12,7 @@ using Tenderhack.Core.Data.TenderhackDbContext;
 namespace Tenderhack.Core.Migrations.Tenderhack
 {
     [DbContext(typeof(TenderhackDbContext))]
-    [Migration("20210927073759_Tenderhack_Initial")]
+    [Migration("20210930081946_Tenderhack_Initial")]
     partial class Tenderhack_Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,39 +49,7 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     b.HasIndex("Title");
 
-                    b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Characteristic", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ExternalId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(511)
-                        .HasColumnType("character varying(511)");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExternalId");
-
-                    b.HasIndex("Name");
-
-                    b.HasIndex("Value");
-
-                    b.ToTable("Characteristics");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Contract", b =>
@@ -126,7 +94,7 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     b.HasIndex("PublicAt");
 
-                    b.ToTable("Contracts");
+                    b.ToTable("Contracts", (string)null);
                 });
 
             modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Order", b =>
@@ -143,7 +111,7 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     b.Property<int>("ContractId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ProductId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("Quantity")
@@ -153,13 +121,13 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     b.HasIndex("Amount");
 
-                    b.HasIndex("ContractId");
-
                     b.HasIndex("ProductId");
 
                     b.HasIndex("Quantity");
 
-                    b.ToTable("Orders");
+                    b.HasIndex("ContractId", "ProductId");
+
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Organization", b =>
@@ -191,9 +159,10 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     b.HasIndex("Name");
 
-                    b.HasIndex("Inn", "Kpp");
+                    b.HasIndex("Inn", "Kpp")
+                        .IsUnique();
 
-                    b.ToTable("Organizations");
+                    b.ToTable("Organizations", (string)null);
                 });
 
             modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Product", b =>
@@ -224,22 +193,98 @@ namespace Tenderhack.Core.Migrations.Tenderhack
 
                     b.HasIndex("Name");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
-            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductsCharacteristics", b =>
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductAttribute", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(511)
+                        .HasColumnType("character varying(511)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ProductAttributes", (string)null);
+                });
+
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductProperty", b =>
                 {
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("CharacteristicId")
+                    b.Property<int>("AttributeId")
                         .HasColumnType("integer");
 
-                    b.HasKey("ProductId", "CharacteristicId");
+                    b.Property<int>("ValueId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("CharacteristicId");
+                    b.HasKey("ProductId", "AttributeId", "ValueId");
 
-                    b.ToTable("ProductsCharacteristics", (string)null);
+                    b.HasIndex("AttributeId");
+
+                    b.HasIndex("ValueId");
+
+                    b.ToTable("ProductProperties", (string)null);
+                });
+
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductsAttributes", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AttributeId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProductId", "AttributeId");
+
+                    b.HasIndex("AttributeId");
+
+                    b.ToTable("ProductsAttributes", (string)null);
+                });
+
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductsValues", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ValueId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProductId", "ValueId");
+
+                    b.HasIndex("ValueId");
+
+                    b.ToTable("ProductsValues", (string)null);
+                });
+
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductValue", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name");
+
+                    b.ToTable("ProductValues", (string)null);
                 });
 
             modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Contract", b =>
@@ -271,7 +316,8 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.Product", "Product")
                         .WithMany("Orders")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Contract");
 
@@ -289,33 +335,74 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductsCharacteristics", b =>
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductProperty", b =>
                 {
-                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.Characteristic", "Characteristic")
-                        .WithMany("ProductsCharacteristics")
-                        .HasForeignKey("CharacteristicId")
+                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductAttribute", "Attribute")
+                        .WithMany("Properties")
+                        .HasForeignKey("AttributeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.Product", "Product")
+                        .WithMany("Properties")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductValue", "Value")
+                        .WithMany("Properties")
+                        .HasForeignKey("ValueId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Attribute");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Value");
+                });
+
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductsAttributes", b =>
+                {
+                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductAttribute", "Attribute")
+                        .WithMany("ProductsAttributes")
+                        .HasForeignKey("AttributeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.Product", "Product")
-                        .WithMany("ProductsCharacteristics")
+                        .WithMany("ProductsAttributes")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Characteristic");
+                    b.Navigation("Attribute");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductsValues", b =>
+                {
+                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.Product", "Product")
+                        .WithMany("ProductsValues")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductValue", "Value")
+                        .WithMany("ProductsValues")
+                        .HasForeignKey("ValueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Value");
                 });
 
             modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Category", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Characteristic", b =>
-                {
-                    b.Navigation("ProductsCharacteristics");
                 });
 
             modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.Contract", b =>
@@ -334,7 +421,25 @@ namespace Tenderhack.Core.Migrations.Tenderhack
                 {
                     b.Navigation("Orders");
 
-                    b.Navigation("ProductsCharacteristics");
+                    b.Navigation("ProductsAttributes");
+
+                    b.Navigation("ProductsValues");
+
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductAttribute", b =>
+                {
+                    b.Navigation("ProductsAttributes");
+
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Tenderhack.Core.Data.TenderhackDbContext.Models.ProductValue", b =>
+                {
+                    b.Navigation("ProductsValues");
+
+                    b.Navigation("Properties");
                 });
 #pragma warning restore 612, 618
         }

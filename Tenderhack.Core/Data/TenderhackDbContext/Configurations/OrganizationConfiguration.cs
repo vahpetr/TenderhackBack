@@ -8,9 +8,11 @@ namespace Tenderhack.Core.Data.TenderhackDbContext.Configurations
     {
         public void Configure(EntityTypeBuilder<Organization> builder)
         {
-            builder.HasIndex(p => p.Name);
-            builder.HasIndex(p => new {p.Inn, p.Kpp});
-            builder.HasIndex(p => p.Kpp);
+          builder.ToTable("Organizations");
+
+          builder.HasIndex(p => p.Name);
+          builder.HasIndex(p => new {p.Inn, p.Kpp}).IsUnique();
+          builder.HasIndex(p => p.Kpp);
         }
     }
 }

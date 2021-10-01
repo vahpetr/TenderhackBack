@@ -28,11 +28,7 @@ namespace Tenderhack.Core.Services
       [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
-      var query = _dbContext.Contracts
-        .Include(p => p.Customer)
-        .Include(p => p.Producer)
-        .Include(p => p.Orders.OrderBy(t => t.Id))
-        .AsNoTracking();
+      var query = Query(_dbContext.Contracts);
 
       query = ApplyFilter(query, filter);
 
@@ -53,8 +49,7 @@ namespace Tenderhack.Core.Services
 
     public async Task<int> GetCountAsync(ContractFilter filter, CancellationToken cancellationToken = default)
     {
-      var query = _dbContext.Contracts
-        .AsNoTracking();
+      var query = _dbContext.Contracts.AsNoTracking();
 
       query = ApplyFilter(query, filter);
 
@@ -65,50 +60,12 @@ namespace Tenderhack.Core.Services
       return count;
     }
 
-    public async Task<Contract?> FindItemAsync(int id, CancellationToken cancellationToken = default)
-    {
-      var item = await _dbContext.Contracts
-        .FindAsync(new object[] { id }, cancellationToken)
-        .ConfigureAwait(false);
-
-      if (item == null)
-      {
-        return null;
-      }
-
-      await _dbContext.Entry(item)
-        .Collection(p => p.Orders.OrderBy(t => t.Id))
-        .LoadAsync(cancellationToken)
-        .ConfigureAwait(false);
-
-      await _dbContext.Entry(item)
-        .Reference(b => b.Customer)
-        .LoadAsync(cancellationToken)
-        .ConfigureAwait(false);
-
-      await _dbContext.Entry(item)
-        .Reference(b => b.Producer)
-        .LoadAsync(cancellationToken)
-        .ConfigureAwait(false);
-
-      return item;
-    }
-
     public async Task<Contract?> GetItemAsync(int id, CancellationToken cancellationToken = default)
     {
-      var item = await _dbContext.Contracts
-        .AsNoTracking()
-        .Include(p => p.Customer)
-        .Include(p => p.Producer)
-        .Include(p => p.Orders.OrderBy(t => t.Id))
-        .AsSplitQuery()
+      var query = Query(_dbContext.Contracts);
+      var item = await query
         .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
         .ConfigureAwait(false);
-
-      if (item == null)
-      {
-        return null;
-      }
 
       return item;
     }
@@ -175,7 +132,7 @@ namespace Tenderhack.Core.Services
 
       if (item.Id != 0)
       {
-        dbItem = await FindItemAsync(item.Id, cancellationToken)
+        dbItem = await GetItemAsync(item.Id, cancellationToken)
           .ConfigureAwait(false);
       }
 
@@ -210,7 +167,7 @@ namespace Tenderhack.Core.Services
         .ConfigureAwait(false);
     }
 
-    private IQueryable<Contract> ApplyFilter(IQueryable<Contract> query, ContractFilter filter)
+    private static IQueryable<Contract> ApplyFilter(IQueryable<Contract> query, ContractFilter filter)
     {
       if (filter.Ids != null && filter.Ids.Count != 0)
       {
@@ -314,6 +271,16 @@ namespace Tenderhack.Core.Services
     private static IQueryable<Contract> ApplyPaging(IQueryable<Contract> query, Paging paging)
     {
       return query.Skip(paging.Skip).Take(paging.Take);
+    }
+
+    private static IQueryable<Contract> Query(IQueryable<Contract> query)
+    {
+      return query
+        .AsNoTracking()
+        .Include(p => p.Customer)
+        .Include(p => p.Producer)
+        .Include(p => p.Orders.OrderBy(t => t.Id))
+        .AsSplitQuery();
     }
   }
 }

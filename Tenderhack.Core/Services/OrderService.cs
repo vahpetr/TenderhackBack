@@ -26,8 +26,7 @@ namespace Tenderhack.Core.Services
       [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
-      var query = _dbContext.Orders
-        .AsNoTracking();
+      var query = Query(_dbContext.Orders);
 
       query = ApplyFilter(query, filter);
 
@@ -48,8 +47,7 @@ namespace Tenderhack.Core.Services
 
     public async Task<int> GetCountAsync(OrderFilter filter, CancellationToken cancellationToken = default)
     {
-      var query = _dbContext.Orders
-        .AsNoTracking();
+      var query = _dbContext.Orders.AsNoTracking();
 
       query = ApplyFilter(query, filter);
 
@@ -60,19 +58,9 @@ namespace Tenderhack.Core.Services
       return count;
     }
 
-    public async Task<Order?> FindItemAsync(int id, CancellationToken cancellationToken = default)
-    {
-      var item = await _dbContext.Orders
-        .FindAsync(new object[] { id }, cancellationToken)
-        .ConfigureAwait(false);
-
-      return item;
-    }
-
     public async Task<Order?> GetItemAsync(int id, CancellationToken cancellationToken = default)
     {
-      var item = await _dbContext.Orders
-        .AsNoTracking()
+      var item = await Query(_dbContext.Orders)
         .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
         .ConfigureAwait(false);
 
@@ -95,7 +83,7 @@ namespace Tenderhack.Core.Services
 
       if (item.Id != 0)
       {
-        dbItem = await FindItemAsync(item.Id, cancellationToken)
+        dbItem = await GetItemAsync(item.Id, cancellationToken)
           .ConfigureAwait(false);
       }
 
@@ -130,7 +118,7 @@ namespace Tenderhack.Core.Services
         .ConfigureAwait(false);
     }
 
-    private IQueryable<Order> ApplyFilter(IQueryable<Order> query, OrderFilter filter)
+    private static IQueryable<Order> ApplyFilter(IQueryable<Order> query, OrderFilter filter)
     {
       if (filter.Ids != null && filter.Ids.Count != 0)
       {
@@ -141,19 +129,13 @@ namespace Tenderhack.Core.Services
       if (filter.ProductIds != null && filter.ProductIds.Count != 0)
       {
         var productIds = filter.ProductIds;
-        query = query.Where(p => p.ProductId.HasValue && productIds.Contains(p.ProductId.Value));
+        query = query.Where(p => productIds.Contains(p.ProductId));
       }
 
-      if (filter.ContractCustomerIds != null && filter.ContractCustomerIds.Count != 0)
+      if (filter.ContractIds != null && filter.ContractIds.Count != 0)
       {
-        var contractCustomerIds = filter.ContractCustomerIds;
-        query = query.Where(p => contractCustomerIds.Contains(p.Contract.CustomerId));
-      }
-
-      if (filter.ContractProducerIds != null && filter.ContractProducerIds.Count != 0)
-      {
-        var contractProducerIds = filter.ContractProducerIds;
-        query = query.Where(p => p.Contract.ProducerId.HasValue && contractProducerIds.Contains(p.Contract.ProducerId.Value));
+        var contractIds = filter.ContractIds;
+        query = query.Where(p => contractIds.Contains(p.ContractId));
       }
 
       return query;
@@ -187,6 +169,11 @@ namespace Tenderhack.Core.Services
     private static IQueryable<Order> ApplyPaging(IQueryable<Order> query, Paging paging)
     {
       return query.Skip(paging.Skip).Take(paging.Take);
+    }
+
+    private static IQueryable<Order> Query(IQueryable<Order> query)
+    {
+      return query.AsNoTracking();
     }
   }
 }

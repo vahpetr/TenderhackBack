@@ -14,7 +14,10 @@ var services = new ServiceCollection()
   .AddLogging(builder =>
   {
     builder.AddConsole();
-    builder.AddDebug();
+
+    if (isDebug) {
+      builder.AddDebug();
+    }
   })
   .AddDbContext<TenderhackDbContext>(options =>
   {
@@ -32,7 +35,7 @@ var services = new ServiceCollection()
   })
   .AddScoped<TenderhackDbContextMigrator>()
   .AddScoped<ProductService>()
-  .AddScoped<CharacteristicService>()
+  .AddScoped<PropertyService>()
   .AddScoped<ContractService>()
   .AddScoped<OrderService>()
   .AddScoped<OrganizationService>()

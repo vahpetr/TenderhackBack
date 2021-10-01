@@ -15,12 +15,10 @@ namespace Tenderhack.Core.Services
   public class ProductService
   {
     private readonly TenderhackDbContext _dbContext;
-    private readonly CharacteristicService _characteristicService;
 
-    public ProductService(TenderhackDbContext dbContext, CharacteristicService characteristicService)
+    public ProductService(TenderhackDbContext dbContext)
     {
       _dbContext = dbContext;
-      _characteristicService = characteristicService;
     }
 
     public async IAsyncEnumerable<Product> GetItemsAsync(
@@ -28,11 +26,7 @@ namespace Tenderhack.Core.Services
       [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
-      var query = _dbContext.Products
-        .Include(p => p.Category)
-        .Include(p => p.Characteristics.OrderBy(t => t.Name))
-        .AsSplitQuery()
-        .AsNoTracking();
+      var query = Query(_dbContext.Products);
 
       query = ApplyFilter(query, filter);
 
@@ -53,8 +47,7 @@ namespace Tenderhack.Core.Services
 
     public async Task<int> GetCountAsync(ProductFilter filter, CancellationToken cancellationToken = default)
     {
-      var query = _dbContext.Products
-        .AsNoTracking();
+      var query = _dbContext.Products.AsNoTracking();
 
       query = ApplyFilter(query, filter);
 
@@ -65,62 +58,18 @@ namespace Tenderhack.Core.Services
       return count;
     }
 
-    public async Task<Product?> FindItemAsync(int id, CancellationToken cancellationToken = default)
-    {
-      var item = await _dbContext.Products
-        .FindAsync(new object[] { id }, cancellationToken)
-        .ConfigureAwait(false);
-
-      if (item == null)
-      {
-        return null;
-      }
-
-      await _dbContext.Entry(item)
-        .Collection(p => p.Characteristics.OrderBy(t => t.Name))
-        .LoadAsync(cancellationToken)
-        .ConfigureAwait(false);
-
-      await _dbContext.Entry(item)
-        .Reference(p => p.Category)
-        .LoadAsync(cancellationToken)
-        .ConfigureAwait(false);
-
-      return item;
-    }
-
     public async Task<Product?> GetItemAsync(int id, CancellationToken cancellationToken = default)
     {
-      var item = await _dbContext.Products
-        .AsNoTracking()
-        .Include(p => p.Category)
-        .Include(p => p.Characteristics.OrderBy(t => t.Name))
-        .AsSplitQuery()
+      var item = await Query(_dbContext.Products)
         .FirstOrDefaultAsync(p => p.Id == id, cancellationToken)
         .ConfigureAwait(false);
-
-      if (item == null)
-      {
-        return null;
-      }
 
       return item;
     }
 
     public void AddItem(Product item)
     {
-      foreach (var tag in item.Characteristics)
-      {
-        if (tag.Id == 0)
-        {
-          _characteristicService.AddItem(tag);
-        }
-        else
-        {
-          _dbContext.Entry(tag).State = EntityState.Unchanged;
-        }
-      }
-
+      _dbContext.Properties.AddRange(item.Properties);
       _dbContext.Products.Add(item);
     }
 
@@ -128,38 +77,10 @@ namespace Tenderhack.Core.Services
     {
       _dbContext.Entry(dbItem).CurrentValues.SetValues(item);
 
-      var dbTagMap = dbItem.Characteristics.ToDictionary(p => p.Id);
-      foreach (var tag in item.Characteristics)
+      dbItem.Properties.Clear();
+      foreach (var tag in item.Properties)
       {
-        if (dbTagMap.TryGetValue(tag.Id, out var dbTag))
-        {
-          // update
-          _characteristicService.UpdateItem(dbTag, tag);
-        }
-        else
-        {
-          if (tag.Id == 0)
-          {
-            _characteristicService.AddItem(tag);
-          }
-          else
-          {
-            _dbContext.Entry(tag).State = EntityState.Unchanged;
-          }
-
-          // attach
-          dbItem.Characteristics.Add(tag);
-        }
-      }
-
-      var tagMap = item.Characteristics.ToDictionary(p => p.Id);
-      foreach (var dbTag in dbItem.Characteristics)
-      {
-        if (!tagMap.ContainsKey(dbTag.Id))
-        {
-          // detach
-          dbItem.Characteristics.Remove(dbTag);
-        }
+        dbItem.Properties.Add(tag);
       }
     }
 
@@ -169,7 +90,7 @@ namespace Tenderhack.Core.Services
 
       if (item.Id != 0)
       {
-        dbItem = await FindItemAsync(item.Id, cancellationToken)
+        dbItem = await GetItemAsync(item.Id, cancellationToken)
           .ConfigureAwait(false);
       }
 
@@ -204,7 +125,7 @@ namespace Tenderhack.Core.Services
         .ConfigureAwait(false);
     }
 
-    private IQueryable<Product> ApplyFilter(IQueryable<Product> query, ProductFilter filter)
+    private static IQueryable<Product> ApplyFilter(IQueryable<Product> query, ProductFilter filter)
     {
       if (filter.Ids != null && filter.Ids.Count != 0)
       {
@@ -257,6 +178,21 @@ namespace Tenderhack.Core.Services
     private static IQueryable<Product> ApplyPaging(IQueryable<Product> query, Paging paging)
     {
       return query.Skip(paging.Skip).Take(paging.Take);
+    }
+
+    private static IQueryable<Product> Query(IQueryable<Product> query)
+    {
+      return query
+        .Include(p => p.Category)
+        .Include(p => p.Properties
+          .OrderBy(p => p.Attribute.Name)
+          .ThenBy(p => p.Value.Name)
+        )
+        .ThenInclude(p => p.Attribute)
+        .Include(p => p.Properties)
+        .ThenInclude(p => p.Value)
+        .AsSplitQuery()
+        .AsNoTracking();
     }
   }
 }
