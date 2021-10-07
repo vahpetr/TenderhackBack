@@ -107,6 +107,13 @@ namespace Tenderhack.Core.Services
       return dbItem;
     }
 
+    public async Task<bool> ExistAsync(int id, CancellationToken cancellationToken = default)
+    {
+      return await _dbContext.Orders
+        .AnyAsync(p => p.Id == id, cancellationToken)
+        .ConfigureAwait(false);
+    }
+
     public async Task DeleteItemAsync(int id, CancellationToken cancellationToken = default)
     {
       var item = new Order() { Id = id };

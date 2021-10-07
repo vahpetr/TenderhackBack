@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -53,31 +52,17 @@ namespace Tenderhack.Api.Controllers
     /// <returns>Items</returns>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
-    [ResponseCache(CacheProfileName = "Caching", VaryByQueryKeys = new []{ "*" })]
-    public async IAsyncEnumerable<Contract> GetItemsAsync(
+    [ProducesDefaultResponseType]
+    [ResponseCache(CacheProfileName = "SharedCache", VaryByQueryKeys = new []{ "*" })]
+    public async Task<ActionResult<IAsyncEnumerable<Contract>>> GetItemsAsync(
       [FromQuery] ContractFilter filter, [FromQuery] Sorting<ContractSortType> sorting, [FromQuery] Paging paging,
       [EnumeratorCancellation] CancellationToken cancellationToken = default
       )
     {
-      var items = _service.Value
-        .GetItemsAsync(filter, sorting, paging, cancellationToken)
-        .ConfigureAwait(false);
-
-      await foreach (var item in items)
-      {
-        yield return item;
-
-        try
-        {
-          cancellationToken.ThrowIfCancellationRequested();
-        }
-        catch (OperationCanceledException)
-        {
-          Response.StatusCode = (int)HttpStatusCode.RequestTimeout;
-          yield break;
-        }
-      }
+      var items = _service.Value.GetItemsAsync(filter, sorting, paging, cancellationToken);
+      return Ok(items);
     }
 
     /// <summary>
@@ -88,22 +73,16 @@ namespace Tenderhack.Api.Controllers
     /// <returns>Count</returns>
     [HttpGet("count")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
-    [ResponseCache(CacheProfileName = "Caching", VaryByQueryKeys = new []{ "*" })]
+    [ProducesDefaultResponseType]
+    [ResponseCache(CacheProfileName = "SharedCache", VaryByQueryKeys = new []{ "*" })]
     public async Task<ActionResult<int>> GetCountAsync([FromQuery] ContractFilter filter, CancellationToken cancellationToken = default)
     {
-      try
-      {
-        var count = await _service.Value
-          .GetCountAsync(filter, cancellationToken)
-          .ConfigureAwait(false);
+      var count = await _service.Value.GetCountAsync(filter, cancellationToken)
+        .ConfigureAwait(false);
 
-        return Ok(count);
-      }
-      catch (OperationCanceledException)
-      {
-        return StatusCode((int)HttpStatusCode.RequestTimeout);
-      }
+      return Ok(count);
     }
 
     /// <summary>
@@ -116,25 +95,15 @@ namespace Tenderhack.Api.Controllers
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
+    [ResponseCache(CacheProfileName = "SharedCache", VaryByQueryKeys = new []{ "*" })]
     public async Task<ActionResult<Contract>> GetItemAsync(int id, CancellationToken cancellationToken = default)
     {
-      try
-      {
-        var result = await _service.Value
-          .GetItemAsync(id, cancellationToken)
-          .ConfigureAwait(false);
+      var result = await _service.Value.GetItemAsync(id, cancellationToken)
+        .ConfigureAwait(false);
 
-        if (result == null)
-        {
-          return NotFound();
-        }
+      if (result == null) return NotFound();
 
-        return Ok(result);
-      }
-      catch (OperationCanceledException)
-      {
-        return StatusCode((int)HttpStatusCode.RequestTimeout);
-      }
+      return Ok(result);
     }
 
     // See https://docs.microsoft.com/ru-ru/ef/core/saving/disconnected-entities#handling-deletes
@@ -149,19 +118,21 @@ namespace Tenderhack.Api.Controllers
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<Contract>> SaveItemAsync([FromBody] Contract item, CancellationToken cancellationToken = default)
     {
       try
       {
-        var result = await _service.Value
-          .SaveItemAsync(item, cancellationToken)
+        var result = await _service.Value.SaveItemAsync(item, cancellationToken)
           .ConfigureAwait(false);
 
         return Ok(result);
       }
-      catch (OperationCanceledException)
+      // https://docs.microsoft.com/ru-ru/ef/core/saving/concurrency
+      catch (DbUpdateConcurrencyException)
       {
-        return StatusCode((int)HttpStatusCode.RequestTimeout);
+        return Conflict();
       }
       catch (DbUpdateException)
       {
@@ -177,26 +148,32 @@ namespace Tenderhack.Api.Controllers
     /// <returns>Status code</returns>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesDefaultResponseType]
     public async Task<IActionResult> DeleteItem(int id, CancellationToken cancellationToken = default)
     {
       try
       {
-        await _service.Value
-          .DeleteItemAsync(id, cancellationToken)
+        await _service.Value.DeleteItemAsync(id, cancellationToken)
           .ConfigureAwait(false);
-      }
-      catch (OperationCanceledException)
-      {
-        return StatusCode((int)HttpStatusCode.RequestTimeout);
+
+        return NoContent();
       }
       catch (DbUpdateConcurrencyException)
       {
-        return NotFound();
-      }
+        // TODO rewrite
+        if (!await _service.Value.ExistAsync(id, cancellationToken))
+          return NotFound();
 
-      return NoContent();
+        return Conflict();
+      }
+      catch (DbUpdateException)
+      {
+        return BadRequest();
+      }
     }
   }
 }

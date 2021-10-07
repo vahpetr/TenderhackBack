@@ -22,10 +22,7 @@ namespace Tenderhack.Api.Controllers
     [ProducesDefaultResponseType]
     public ActionResult<PredictQuantityOutput> Post([FromBody] PredictQuantityInput input)
     {
-      if (!ModelState.IsValid) return BadRequest();
-
       var prediction = _predictionEnginePool.Predict("PredictQuantity", input);
-
       return Ok(prediction);
     }
   }

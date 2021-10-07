@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -50,31 +49,17 @@ namespace Tenderhack.Api.Controllers
     /// <returns>Items</returns>
     [HttpGet("predict/demands")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
-    [ResponseCache(CacheProfileName = "Caching", VaryByQueryKeys = new []{ "*" })]
-    public async IAsyncEnumerable<ScoredOrder> PredictDemandsAsync(
+    [ProducesDefaultResponseType]
+    [ResponseCache(CacheProfileName = "SharedCache", VaryByQueryKeys = new []{ "*" })]
+    public async Task<ActionResult<IAsyncEnumerable<ScoredOrder>>> PredictDemandsAsync(
       [FromQuery] PredictDemandsRequest request,
       [EnumeratorCancellation] CancellationToken cancellationToken = default
       )
     {
-      var items = _service.Value
-        .PredictDemandsAsync(request, cancellationToken)
-        .ConfigureAwait(false);
-
-      await foreach (var item in items)
-      {
-        yield return item;
-
-        try
-        {
-          cancellationToken.ThrowIfCancellationRequested();
-        }
-        catch (OperationCanceledException)
-        {
-          Response.StatusCode = (int)HttpStatusCode.RequestTimeout;
-          yield break;
-        }
-      }
+      var items = _service.Value.PredictDemandsAsync(request, cancellationToken);
+      return Ok(items);
     }
 
     /// <summary>
@@ -87,31 +72,17 @@ namespace Tenderhack.Api.Controllers
     /// <returns>Items</returns>
     [HttpGet("predict/purchases")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status408RequestTimeout)]
-    [ResponseCache(CacheProfileName = "Caching", VaryByQueryKeys = new []{ "*" })]
-    public async IAsyncEnumerable<ScoredOrder> PredictPurchasesAsync(
+    [ProducesDefaultResponseType]
+    [ResponseCache(CacheProfileName = "SharedCache", VaryByQueryKeys = new []{ "*" })]
+    public async Task<ActionResult<IAsyncEnumerable<ScoredOrder>>> PredictPurchasesAsync(
       [FromQuery] PredictPurchasesRequest request,
       [EnumeratorCancellation] CancellationToken cancellationToken = default
     )
     {
-      var items = _service.Value
-        .PredictPurchasesAsync(request, cancellationToken)
-        .ConfigureAwait(false);
-
-      await foreach (var item in items)
-      {
-        yield return item;
-
-        try
-        {
-          cancellationToken.ThrowIfCancellationRequested();
-        }
-        catch (OperationCanceledException)
-        {
-          Response.StatusCode = (int)HttpStatusCode.RequestTimeout;
-          yield break;
-        }
-      }
+      var items = _service.Value.PredictPurchasesAsync(request, cancellationToken);
+      return Ok(items);
     }
   }
 }

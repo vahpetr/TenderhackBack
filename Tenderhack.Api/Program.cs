@@ -86,7 +86,7 @@ services.AddDbContextPool<TenderhackDbContext>(options =>
 }, 1024);
 services.AddResponseCaching(options =>
 {
-    options.MaximumBodySize = 128 * 1024;
+    options.MaximumBodySize = 256 * 1024;
 });
 services.AddCors(options =>
   {
@@ -103,19 +103,26 @@ services.AddControllers(options =>
     options.OutputFormatters.RemoveType<StringOutputFormatter>();
     options.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>();
 
-    options.CacheProfiles.Add("Caching",
-      new CacheProfile
-      {
-        NoStore = true,
-        Duration = 600,
-        Location = ResponseCacheLocation.None
-      });
-    options.CacheProfiles.Add("NoCaching",
+    options.CacheProfiles.Add("SharedCache",
       new CacheProfile
       {
         NoStore = false,
-        Duration = 0,
+        Duration = 600,
         Location = ResponseCacheLocation.Any
+      });
+    options.CacheProfiles.Add("UniqueCache",
+      new CacheProfile
+      {
+        NoStore = false,
+        Duration = 600,
+        Location = ResponseCacheLocation.Client
+      });
+    options.CacheProfiles.Add("NoCache",
+      new CacheProfile
+      {
+        NoStore = true,
+        Duration = 0,
+        Location = ResponseCacheLocation.None
       });
   })
   .AddJsonOptions(options => SetupJsonSerializerOptions(options.JsonSerializerOptions));
@@ -155,7 +162,8 @@ app
         {
             "/",
             "/favicon.ico",
-            "/robots.txt"
+            "/robots.txt",
+            "/health"
         };
         options.IgnoreRoutesStartWith = new[]
         {
